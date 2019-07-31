@@ -196,6 +196,8 @@ class View {
     bindEvents(controller) {
         this.form.addEventListener('submit', controller.handleAddTodo);
         this.todoList.addEventListener('click', controller.handleDeleteTodo);
+        this.todoList.addEventListener('input', controller.handleEditTodo);
+        this.todoList.addEventListener('focusout', controller.handleEditTodoComplete);
         this.todoList.addEventListener('change', controller.handleToggle);
     }
 }
@@ -212,12 +214,14 @@ class Controller {
         this.model = model;
         this.view = view;
 
+        this.model.bindEvents(this);
+        this.view.bindEvents(this);
+
+        this.temporaryEditValue
+
         // Display initial todos
         // Exibir os todos iniciais
         this.onTodoListChanged(this.model.todos);
-
-        this.model.bindEvents(this);
-        this.view.bindEvents(this);
     }
 
     onTodoListChanged = todos => {
@@ -227,6 +231,8 @@ class Controller {
     // Handle submit event for adding a todo
     // Lidar com o evento de envio para adicionar um todo
     handleAddTodo = event => {
+        console.log('handleAddTodo()', event);
+        
         event.preventDefault();
 
         if (this.view.todoText) {
@@ -241,9 +247,34 @@ class Controller {
         }
     }
 
+    // Update temporary state
+    // Atualizar estado temporário
+    handleEditTodo = event => {
+        //console.log('handleEditTodo()', event);
+        
+        if (event.target.className === 'editable') {
+            this.temporaryEditValue = event.target.innerText;
+        }
+    }
+
+    // Send the completed value to the model
+    // Envie o valor completo para o modelo
+    handleEditTodoComplete = event => {
+        //console.log('handleEditTodoComplete()', event);
+        
+        if (this.temporaryEditValue) {
+            const id = parseInt(event.target.parentElement.id);
+
+            this.model.editTodo(id, this.temporaryEditValue);
+            this.temporaryEditValue = '';
+        }
+    }
+
     // Handle click event for deleting a todo
     // Lidar com evento de clique para excluir um todo
     handleDeleteTodo = event => {
+        //console.log('handleDeleteTodo()', event);
+        
         if (event.target.className === 'delete') {
             const id = parseInt(event.target.parentElement.id);
 
@@ -254,6 +285,8 @@ class Controller {
     // Handle change event for toggling a todo
     // Lidar com o evento de mudança para alternar um todo
     handleToggle = event => {
+        //console.log('handleToggle()', event);
+        
         if (event.target.type === 'checkbox') {
             const id = parseInt(event.target.parentElement.id);
 
