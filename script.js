@@ -5,18 +5,15 @@
 class Model {
 
     constructor() {
-        // The state of the model, an array of todo objects, prepopulated with some data
-        // O estado do modelo, uma matriz de objetos todo, preenchidos com alguns dados
-        this.todos = [
-            {id: 1, text: 'Run a marathon', complete: false},
-            {id: 2, text: 'Plant a garden', complete: false}
-        ];
+        this.todos = JSON.parse(localStorage.getItem('todos')) || [];
     }
 
     // Append a todo to the todos array
     // Anexa um todo ao array de todos
     addTodo(todo) {
         this.todos = [...this.todos, todo];
+
+        this.update();
 
         this.onTodoListChanged(this.todos);
     }
@@ -28,6 +25,8 @@ class Model {
             todo.id === id ? {id: todo.id, text: updatedText, complete: todo.complete} : todo
         );
 
+        this.update();
+
         this.onTodoListChanged(this.todos);
     }
 
@@ -35,6 +34,8 @@ class Model {
     // Filtre um todo do array por id
     deleteTodo(id) {
         this.todos = this.todos.filter(todo => todo.id !== id);
+
+        this.update();
 
         this.onTodoListChanged(this.todos);
     }
@@ -46,11 +47,17 @@ class Model {
             todo.id === id ? {id: todo.id, text: todo.text, complete: !todo.complete} : todo
         );
 
+        this.update();
+
         this.onTodoListChanged(this.todos);
     }
 
     bindEvents(controller) {
         this.onTodoListChanged = controller.onTodoListChanged;
+    }
+
+    update() {
+        localStorage.setItem('todos', JSON.stringify(this.todos))
     }
 
 }
